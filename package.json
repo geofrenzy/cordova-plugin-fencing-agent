@@ -1,0 +1,11 @@
+{
+  "name": "cordova-plugin-fencing-agent",
+  "version": "1.0.0",
+  "description": "",
+  "main": "www/fencingAgent.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Josh Randall",
+  "license": "UNLICENSED"
+}

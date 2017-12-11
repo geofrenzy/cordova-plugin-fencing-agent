@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
+           id="net.geofrenzy.cordova.fencingagent"
+      version="0.0.1">
+    <name>Fencing Agent</name>
+    <description>Cordova Fencing Agent plugin</description>
+    <license>Proprietary</license>
+    <keywords>cordova,geofencing,Geonetwork</keywords>
+
+    <engines>
+        <engine name="cordova-android" version=">=4.0.0" />
+    </engines>
+
+    <asset src="www/fencingAgent.js" target="js/fencingAgent.js"/>
+
+    <js-module src="www/fencingAgent.js" name="fencingAgent">
+        <clobbers target="window.plugins.fencingAgent" />
+    </js-module>
+
+    <platform name="android">
+        <config-file target="res/xml/config.xml" parent="/*">
+            <feature name="FencingAgent">
+                <param name="android-package" value="net.geofrenzy.android.cordova.FencingAgentPlugin" />
+            </feature>
+        </config-file>
+
+        <source-file src="src/android/FencingAgentPlugin.java" target-dir="src/net/geofrenzy/android/cordova" />
+        <resource-file src="src/android/libs/geofrenzyCommons.jar" target="libs/geofrenzyCommons.jar" />
+        <resource-file src="src/android/libs/fencingAgent.aar" target="libs/fencingAgent.aar" />
+
+        <framework custom="true" src="./src/android/fencingAgent.gradle" type="gradleReference" />
+        <!--<framework src="com.android.support:support-v4:+" />-->
+        <framework src="com.google.android.gms:play-services-location:10.2.0" />
+        <framework src="io.reactivex.rxjava2:rxjava:2.0.2" />
+        <framework src="com.google.code.gson:gson:2.8.0" />
+        <framework src="com.squareup.retrofit2:retrofit:2.1.0" />
+        <framework src="net.danlew:android.joda:2.9.9" />
+    </platform>
+</plugin>
