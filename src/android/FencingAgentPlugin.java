@@ -88,14 +88,13 @@ public class FencingAgentPlugin extends CordovaPlugin {
                 );
                 delegate = new CordovaDelegate(fa);
 
-                fa.addDelegate(delegate);
-
                 agents.put(geodomain, fa);
                 delegates.put(geodomain, delegate);
 
                 callbackContext.success(responseJSON);
                 return true;
             case START:
+                fa.addDelegate(delegate);
                 fa.start();
                 callbackContext.success(responseJSON);
                 return true;
