@@ -23,7 +23,16 @@ import net.geofrenzy.android.sdk.domain.agentstate.AgentStateUpdate;
 import net.geofrenzy.android.sdk.domain.agentstate.ApproachDetails;
 import net.geofrenzy.android.sdk.domain.agentstate.WatchedFence;
 import net.geofrenzy.android.sdk.domain.fences.Point;
-
+import net.geofrenzy.android.sdk.domain.requirements.domain.RequirementBaseType;
+import net.geofrenzy.android.sdk.domain.requirements.BooleanSetRequirement;
+import net.geofrenzy.android.sdk.domain.requirements.ColorRequirement;
+import net.geofrenzy.android.sdk.domain.requirements.ProfileRequirement;
+import net.geofrenzy.android.sdk.domain.requirements.ThresholdRequirement;
+import net.geofrenzy.android.sdk.domain.requirements.IntervalRequirement;
+import net.geofrenzy.android.sdk.exception.BlobRequirementsUnsupportedException;
+import net.geofrenzy.android.sdk.domain.agentstate.WatchedGeodomain;
+import net.geofrenzy.android.sdk.domain.geodomains.Geodomain;
+import net.geofrenzy.android.sdk.domain.requirements.Requirement;
 
 public class FencingAgentPlugin extends CordovaPlugin {
     private static final String LOG_TAG = "FencingAgentPlugin";
@@ -356,8 +365,91 @@ public class FencingAgentPlugin extends CordovaPlugin {
             fenceList.add(serializedFence);
         }
         serializedState.put("fences", new JSONArray(fenceList));
+        serializedState.put("geodomain", serializeWatchedGeodomain(agentState.getGeodomain()));
 
         return serializedState;
+    }
+
+    private static JSONObject serializeWatchedGeodomain(WatchedGeodomain watchedGeodomain) throws JSONException {
+        JSONObject serializedWatchedGeodomain = new JSONObject();
+        JSONObject serializedStatus = new JSONObject();
+
+        serializedStatus.put("status", watchedGeodomain.getGeodomainStatus());
+        serializedStatus.put("retrievalTime", watchedGeodomain.getRetrievalTime());
+
+        serializedWatchedGeodomain.put("geodomain", serializeGeodomain(watchedGeodomain.raw()));
+        serializedWatchedGeodomain.put("status", serializedStatus);
+
+        return serializedWatchedGeodomain;
+    }
+    private static JSONObject serializeGeodomain(Geodomain geodomain) throws JSONException {
+        JSONObject serializedGeodomain = new JSONObject();
+
+        ArrayList<JSONObject> requirementList = new ArrayList<JSONObject>();
+        for(Requirement requirement : geodomain.getRequirements()) {
+            requirementList.add(serializeRequirement(requirement, geodomain.getDomainName()));
+        }
+        JSONArray serializedRequirements = new JSONArray(requirementList);
+
+        serializedGeodomain.put("requirements", serializedRequirements);
+        serializedGeodomain.put("ttl", geodomain.getTtl());
+        serializedGeodomain.put("domainName", geodomain.getDomainName());
+        serializedGeodomain.put("identifier", geodomain.getIdentifier());
+        return serializedGeodomain;
+    }
+
+    private static JSONObject serializeRequirement(Requirement requirement, String geodomain) throws JSONException {
+        JSONObject serializedRequirement = new JSONObject();
+        serializedRequirement.put("baseType", requirement.getBaseType().toString());
+        switch(requirement.getBaseType()) {
+            case COLOR:
+                ColorRequirement colorRequirement = (ColorRequirement) requirement;
+                serializedRequirement.put("red", colorRequirement.getRed());
+                serializedRequirement.put("green", colorRequirement.getGreen());
+                serializedRequirement.put("blue", colorRequirement.getBlue());
+                serializedRequirement.put("alpha", colorRequirement.getAlpha());
+                break;
+            case BOOLEANSET:
+                BooleanSetRequirement boolsetRequirement = (BooleanSetRequirement) requirement;
+                serializedRequirement.put("bool0", boolsetRequirement.isBit0());
+                serializedRequirement.put("bool1", boolsetRequirement.isBit1());
+                serializedRequirement.put("bool2", boolsetRequirement.isBit2());
+                serializedRequirement.put("bool3", boolsetRequirement.isBit3());
+                serializedRequirement.put("bool4", boolsetRequirement.isBit4());
+                serializedRequirement.put("bool5", boolsetRequirement.isBit5());
+                serializedRequirement.put("bool6", boolsetRequirement.isBit6());
+                serializedRequirement.put("bool7", boolsetRequirement.isBit7());
+                serializedRequirement.put("bool8", boolsetRequirement.isBit8());
+                serializedRequirement.put("bool9", boolsetRequirement.isBit9());
+                serializedRequirement.put("bool10", boolsetRequirement.isBit10());
+                serializedRequirement.put("bool11", boolsetRequirement.isBit11());
+                serializedRequirement.put("bool12", boolsetRequirement.isBit12());
+                serializedRequirement.put("bool13", boolsetRequirement.isBit13());
+                serializedRequirement.put("bool14", boolsetRequirement.isBit14());
+                serializedRequirement.put("bool15", boolsetRequirement.isBit15());
+                break;
+            case THRESHOLD:
+                ThresholdRequirement thresholdRequirement = (ThresholdRequirement) requirement;
+                serializedRequirement.put("lowerBound", thresholdRequirement.getLower());
+                serializedRequirement.put("upperBound", thresholdRequirement.getUpper());
+                serializedRequirement.put("unit", thresholdRequirement.getUnit().toString());
+                break;
+            case INTERVAL:
+                IntervalRequirement intervalRequirement = (IntervalRequirement) requirement;
+                serializedRequirement.put("unit", intervalRequirement.getUnit().toString());
+                serializedRequirement.put("initialState", intervalRequirement.getInterval().getInitialState());
+                serializedRequirement.put("floor", intervalRequirement.getInterval().getFloor());
+                serializedRequirement.put("ceiling", intervalRequirement.getInterval().getCeiling());
+                serializedRequirement.put("stateChanges", new JSONArray(intervalRequirement.getInterval().getStateChanges()));
+                break;
+            case PROFILE:
+                ProfileRequirement profileRequirement = (ProfileRequirement) requirement;
+                serializedRequirement.put("value", profileRequirement.getValue());
+                break;
+            case BLOB:
+                throw new BlobRequirementsUnsupportedException(geodomain);
+        }
+        return serializedRequirement;
     }
 
     private static JSONObject serializeAgentStateUpdate(AgentStateUpdate<Void> agentStateUpdate) throws JSONException {
