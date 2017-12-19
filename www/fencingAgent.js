@@ -155,9 +155,13 @@ function IntervalRequirement(intervalJSON) {
     this.initialState = intervalJSON.initialState;
     this.floor = validateNumber(intervalJSON.floor, "IntervalRequirement.prototype.floor");
     this.ceiling = validateNumber(intervalJSON.ceiling, "IntervalRequirement.prototype.ceiling");
+    this.unit = intervalJSON.unit;//TODO validate
 
     this.getStateAtPoint = function(point) {
         validateNumber(point, "IntervalRequirement.prototype.getStateAtPoint");
+        if(point < floor || point > ceiling) {
+            throw new Error("IntervalRequirement.prototype.getStateAtPoint recieved a point that was not between its floor and ceiling.");
+        }
         var currentState = this.initialState;
         for(var i = 0; i < stateChangePoints.length; i++) {
             currentState = !currentState;
