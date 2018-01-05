@@ -49,43 +49,42 @@ public class FencingAgentPlugin extends CordovaPlugin {
 
     public boolean execute(String action, CordovaArgs args, CallbackContext callbackContext) throws JSONException {
         try {
+            String geodomain = args.optString(GEODOMAIN_ARGUMENT_POSITION);
+            if(geodomain == null) {
+                throw new IllegalArgumentException("`null` Geodomain recieved by FencingAgent Cordova plugin.");
+            }
+            PluginAction actionType = PluginAction.fromName(action);
 
-        String geodomain = args.optString(GEODOMAIN_ARGUMENT_POSITION);
-        if(geodomain == null) {
-            throw new IllegalArgumentException("`null` Geodomain recieved by FencingAgent Cordova plugin.");
-        }
-        PluginAction actionType = PluginAction.fromName(action);
+            FencingAgent<Void> fa = agents.get(geodomain);
+            CordovaDelegate delegate = delegates.get(geodomain);
+            if(fa == null && actionType != PluginAction.CREATE_AGENT) {
+                throw new IllegalStateException("Cordova Fencing Agent attempted to act on a non-existent agent." + 
+                        " This state should be unreachable; please file a bug report with Geofrenzy."
+                        );
+            }
+            if(delegate == null && actionType != PluginAction.CREATE_AGENT) {
+                throw new IllegalStateException("Cordova Fencing Agent attempted to act on a non-existent agent." + 
+                        " This state should be unreachable; please file a bug report with Geofrenzy."
+                        );//TODO: differentiate error message
+            }
 
-        FencingAgent<Void> fa = agents.get(geodomain);
-        CordovaDelegate delegate = delegates.get(geodomain);
-        if(fa == null && actionType != PluginAction.CREATE_AGENT) {
-            throw new IllegalStateException("Cordova Fencing Agent attempted to act on a non-existent agent." + 
-                    " This state should be unreachable; please file a bug report with Geofrenzy."
-            );
-        }
-        if(delegate == null && actionType != PluginAction.CREATE_AGENT) {
-            throw new IllegalStateException("Cordova Fencing Agent attempted to act on a non-existent agent." + 
-                    " This state should be unreachable; please file a bug report with Geofrenzy."
-            );//TODO: differentiate error message
-        }
+            JSONObject responseJSON = new JSONObject();
+            System.out.println("MARK Recieved an action from JS: " + action);
+            switch(actionType) {
+                case CREATE_AGENT:
+                    if(fa != null) {
+                        throw new IllegalStateException(
+                                "Geofrenzy Cordova SDK attempted to create a FencingAgent that already existed." +
+                                "This state should be unreachable; please file a bug report with Geofrenzy."
+                        );
+                    }
+                    int zoomLevel = args.getInt(ZOOMLEVEL_ARGUMENT_POSITION);
+                    int range = args.getInt(RANGE_ARGUMENT_POSITION);
+                    boolean detectApproach = args.getBoolean(DETECT_APPROACH_ARGUMENT_POSITION);
+                    boolean interiorFocus = args.getBoolean(INTERIOR_FOCUS_ARGUMENT_POSITION);
 
-        JSONObject responseJSON = new JSONObject();
-        System.out.println("MARK Recieved an action from JS: " + action);
-        switch(actionType) {
-            case CREATE_AGENT:
-                if(fa != null) {
-                    throw new IllegalStateException(
-                            "Geofrenzy Cordova SDK attempted to create a FencingAgent that already existed." +
-                            "This state should be unreachable; please file a bug report with Geofrenzy."
-                    );
-                }
-                int zoomLevel = args.getInt(ZOOMLEVEL_ARGUMENT_POSITION);
-                int range = args.getInt(RANGE_ARGUMENT_POSITION);
-                boolean detectApproach = args.getBoolean(DETECT_APPROACH_ARGUMENT_POSITION);
-                boolean interiorFocus = args.getBoolean(INTERIOR_FOCUS_ARGUMENT_POSITION);
-
-                fa = new FencingAgent<Void>(
-                        new FencingAgentProfile.Builder()
+                    fa = new FencingAgent<Void>(
+                            new FencingAgentProfile.Builder()
                             .setGeodomain(geodomain)
                             .setRange(range)
                             .setZoomLevel(zoomLevel)
@@ -93,42 +92,42 @@ public class FencingAgentPlugin extends CordovaPlugin {
                             .setInsideFocus(interiorFocus)
                             .setContext(this.cordova.getActivity().getApplicationContext())
                             .createAgentProfile(),
-                        Void.class
-                );
-                delegate = new CordovaDelegate(fa);
+                            Void.class
+                            );
+                    delegate = new CordovaDelegate(fa);
 
-                agents.put(geodomain, fa);
-                delegates.put(geodomain, delegate);
+                    agents.put(geodomain, fa);
+                    delegates.put(geodomain, delegate);
 
-                callbackContext.success(responseJSON);
-                return true;
-            case START:
-                fa.addDelegate(delegate);
-                fa.start();
-                callbackContext.success(responseJSON);
-                return true;
-            case QUIT:
-                fa.quit();
-                callbackContext.success(responseJSON);
-                return true;
-            case PURGE_CACHE:
-                fa.purgeCache();
-                callbackContext.success(responseJSON);
-                return true;
-            case WATCH_FOR_NEXT_EVENT:
-                System.out.println("MARK watchfornextevent recieved from JS");
-                if(callbackContext == null) {
-                    throw new IllegalStateException("Fencing Agent plugin for Cordova recieved a null CallbackContext from Javascript.");
-                }
-                delegate.notifyJavascript(callbackContext);
-                return true;
-            default:
-                throw new IllegalStateException("You have found a bug in the Fencing Agent plugin for Cordova. Please report it to Geofrenzy with a stacktrace.");
-        }
-        } catch(JSONException jsone) {
-            logError(jsone);
-            throw new RuntimeException(jsone);
-        
+                    callbackContext.success(responseJSON);
+                    return true;
+                case START:
+                    fa.addDelegate(delegate);
+                    fa.start();
+                    callbackContext.success(responseJSON);
+                    return true;
+                case QUIT:
+                    fa.quit();
+                    callbackContext.success(responseJSON);
+                    return true;
+                case PURGE_CACHE:
+                    fa.purgeCache();
+                    callbackContext.success(responseJSON);
+                    return true;
+                case WATCH_FOR_NEXT_EVENT:
+                    System.out.println("MARK watchfornextevent recieved from JS");
+                    if(callbackContext == null) {
+                        throw new IllegalStateException("Fencing Agent plugin for Cordova recieved a null CallbackContext from Javascript.");
+                    }
+                    delegate.notifyJavascript(callbackContext);
+                    return true;
+                default:
+                    throw new IllegalStateException("You have found a bug in the Fencing Agent plugin for Cordova. Please report it to Geofrenzy with a stacktrace.");
+            }
+        } catch(Throwable throwable) {
+            logError(throwable);
+            callbackContext.error(throwable.getMessage());
+            return true;
         }
     }
 
@@ -227,7 +226,7 @@ public class FencingAgentPlugin extends CordovaPlugin {
                 handleResponse(createResponse(DelegateMessageType.ON_EXCEPTION, messageContent), false);
             } catch(JSONException jsone) {
                 logError(jsone);
-                throw new RuntimeException(jsone);
+                //throw new RuntimeException(jsone);
             }
         }
 
@@ -236,7 +235,7 @@ public class FencingAgentPlugin extends CordovaPlugin {
                 handleResponse(createResponse(DelegateMessageType.ON_FENCE_REFRESH, serializeAgentStateUpdate(agentStateUpdate)), true);
             } catch(JSONException jsone) {
                 logError(jsone);
-                throw new RuntimeException(jsone);
+                //throw new RuntimeException(jsone);
             }
         }
 
@@ -245,7 +244,7 @@ public class FencingAgentPlugin extends CordovaPlugin {
                 handleResponse(createResponse(DelegateMessageType.ON_START, serializeAgentState(initialState)), true);
             } catch(JSONException jsone) {
                 logError(jsone);
-                throw new RuntimeException(jsone);
+                //throw new RuntimeException(jsone);
             }
         }
 
@@ -254,7 +253,7 @@ public class FencingAgentPlugin extends CordovaPlugin {
                 handleResponse(createResponse(DelegateMessageType.ON_QUIT, serializeAgentState(finalState)), true);
             } catch(JSONException jsone) {
                 logError(jsone);
-                throw new RuntimeException(jsone);
+                //throw new RuntimeException(jsone);
             }
         }
 
@@ -333,6 +332,10 @@ public class FencingAgentPlugin extends CordovaPlugin {
 
     private static JSONObject serializeAgentState(AgentState<Void> agentState) throws JSONException {
         JSONObject serializedState = new JSONObject();
+        if(agentState == null) {
+            return serializedState;
+        }
+
         ArrayList<JSONObject> fenceList = new ArrayList<JSONObject>();
         for(WatchedFence fence : agentState.getFences()) {
             JSONObject serializedFence = new JSONObject();
@@ -468,8 +471,12 @@ public class FencingAgentPlugin extends CordovaPlugin {
 
     private static JSONObject serializeAgentStatus(FencingAgent<Void> fa) throws JSONException {
         JSONObject serializedAgentStatus = new JSONObject();
-        serializedAgentStatus.put("isRunning", fa.isRunning());
-        serializedAgentStatus.put("geodomain", fa.getRawGeodomain().getDomainName());
+        try {
+            serializedAgentStatus.put("isRunning", fa.isRunning());
+            serializedAgentStatus.put("geodomain", fa.getRawGeodomain().getDomainName());
+        } catch(NullPointerException npe) {
+            return serializedAgentStatus;
+        }
         return serializedAgentStatus;
     }
 

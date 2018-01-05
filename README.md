@@ -1,5 +1,9 @@
 # Cordova Fencing Agent
 
+## Installation
+`cordova plugin add cordova-plugin-fencing-agent`
+If after `cordova build`, you end up with an error message complaining about JARs, just `rm -rf platforms` and `cordova platform add` everything back, and everything should work.
+
 ## What can I do with a Fencing Agent?
 Fencing Agents monitor the space around a device to detect requirements and geofences wherein those requirements apply. (Such geofences, paired with their requirements, are called SmartFences™.)
 
@@ -10,7 +14,7 @@ The key difference between ordinary geofences and SmartFences is that SmartFence
 _But if I'm only using my own geofences, can't I just add some metadata?_
 
 Not quite. The difference is deeper than that. 
-* GeoNetwork's _FDN_ (Fence Delivery Network) has been designed to make SmartFences easy and performat to retrieve and update. What this means is that many devices using Fencing Agents can quickly respond to changes in rules or geometry in real time.
+* GeoNetwork's _FDN_ (Fence Delivery Network) has been designed to make SmartFences easy and fast to retrieve and update. What this means is that many devices using Fencing Agents can quickly respond to changes in rules or geometry in real time.
 * GeoNetwork hosts a marketplace for SmartFences and requirements, so it's possible to leverage somebody else's SmartFences instead of creating and maintaining large sets of geometries.
 * GeoNetwork also produces SDKs for a variety of platforms, so that you don't have to reinvent your geofencing logic on every platform you want your app on.
 * GeoNetwork's marketplace also has systems for managing authority over space, so in the event of an unforeseen conflict with another party, you have a platform to resolve it.
@@ -18,9 +22,12 @@ Not quite. The difference is deeper than that.
 ## How do I use a Fencing Agent?
 The essential workflow of the Fencing Agent is that the Fencing Agent, once started, will autonomously monitor the area, and periodically send its findings to the app developer.
 
-Specifically, it looks like this: (This example should work when copy-pasted)
+Specifically, it looks like this: (This example should be run after the `deviceready` event has fired.)
 
 ``` javascript
+//IMPORTANT: If you get an error on these lines, then you need to move this example into a listener for "deviceready". 
+//With the default setup, that should be inside of app.onDeviceReady.
+
 //prototype imports
 var FencingAgent = window.plugins.fencingAgent.FencingAgent;
 var FencingAgentDelegate = window.plugins.fencingAgent.FencingAgentDelegate;
@@ -29,10 +36,10 @@ var FencingAgentProfile = window.plugins.fencingAgent.FencingAgentProfile;
 //This is a configuration object that tells the Fencing Agent what requirements to look for, and the area that it should look
 var profile = new FencingAgentProfile({
         "geodomain": "smartcity.geofrenzy.place",//Should look for the "smartcity.geofrenzy.place." Geodomain® (this will be explained in depth later)
-        "range": 20//Should look for 20 miles around
+        "range": 20//Should look for fences within 20 kilometers away
 })
 //This creates the FencingAgent using that configuration object, but the FA is not running yet.
-var fa = new FencingAgent(fencingAgentProfile);
+var fa = new FencingAgent(profile);
 
 //Before we start the FA, we want to register delegates to respond to its messages. These can also be added after the FA has started.
 var delegate = new FencingAgentDelegate(
@@ -49,6 +56,7 @@ var delegate = new FencingAgentDelegate(
             alert("FA quit.");
         }
 );
+fa.addDelegate(delegate);
 fa.start();//Should (asynchronously) alert "FA started!"
 
 //---other code---
@@ -237,3 +245,4 @@ Agent status update
 
 ### But wait, what's a Geodomain?
 A Geodomain is a holder for requirements and geometries that enriches those geometries with its requriements, and corresponds to a domain name with a `.place` [tld](https://en.wikipedia.org/wiki/Top-level_domain). These are used to query the FDN.
+

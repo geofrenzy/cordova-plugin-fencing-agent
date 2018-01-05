@@ -285,8 +285,9 @@ function FencingAgentDelegate(onStarted, fencesRefreshed, onError, onQuit) {
                 this.fencesRefreshed(new FencingAgentStateUpdate(messageContent), agentStatus);
                 break;
             case "onException":
-                //TODO
+                //TODO?
                 this.onError(messageContent, agentStatus);
+                break;
             default:
                 throw new Error("`FencingAgentDelegate` object recieved unrecognized message type: `" + messageIdentifier + "`");
         }
