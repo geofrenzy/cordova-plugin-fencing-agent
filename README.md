@@ -4,6 +4,10 @@
 `cordova plugin add cordova-plugin-fencing-agent`
 If after `cordova build`, you end up with an error message complaining about JARs, just `rm -rf platforms` and `cordova platform add` everything back, and everything should work.
 
+## Links
+* Github repository: https://github.com/geofrenzy/cordova-plugin-fencing-agent
+* Example app source: https://github.com/geofrenzy/Cordova-Blink-1-LED-demo
+
 ## What can I do with a Fencing Agent?
 Fencing Agents monitor the space around a device to detect requirements and geofences wherein those requirements apply. (Such geofences, paired with their requirements, are called SmartFences™.)
 
