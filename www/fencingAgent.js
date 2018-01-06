@@ -215,7 +215,7 @@ function FencingAgentProfile(config, lenient) {
             throw new Error("`zoomLevel` in `FencingAgentProfile` must be a whole number between 0 and 32.");
         }
     } else {
-        config.zoomLevel = 16;//TODO: de-magicnumber this
+        config.zoomLevel = 16;//TODO: get this from a configuration file
     }
 
     if(typeof config.detectApproach !== "undefined" && config.detectApproach !== null) {

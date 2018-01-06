@@ -29,23 +29,45 @@ The essential workflow of the Fencing Agent is that the Fencing Agent, once star
 Specifically, it looks like this: (This example should be run after the `deviceready` event has fired.)
 
 ``` javascript
-//IMPORTANT: If you get an error on these lines, then you need to move this example into a listener for "deviceready". 
-//With the default setup, that should be inside of app.onDeviceReady.
+/*
+    IMPORTANT: If you get an error on these lines, 
+    then you need to move this example into a listener for
+    "deviceready". 
+    With the default setup,
+    that should be inside of app.onDeviceReady.
+*/
 
 //prototype imports
 var FencingAgent = window.plugins.fencingAgent.FencingAgent;
-var FencingAgentDelegate = window.plugins.fencingAgent.FencingAgentDelegate;
-var FencingAgentProfile = window.plugins.fencingAgent.FencingAgentProfile;
+var FencingAgentDelegate = window.plugins.fencingAgent
+    .FencingAgentDelegate;
+var FencingAgentProfile = window.plugins.fencingAgent
+    .FencingAgentProfile;
 
-//This is a configuration object that tells the Fencing Agent what requirements to look for, and the area that it should look
+/*
+    This is a configuration object that tells the Fencing Agent 
+    which requirements to look for, and the area where 
+    it should look.
+*/
 var profile = new FencingAgentProfile({
-        "geodomain": "smartcity.geofrenzy.place",//Should look for the "smartcity.geofrenzy.place." Geodomain® (this will be explained in depth later)
+        /*
+            Should look for the "smartcity.geofrenzy.place."
+            GeoDomain.
+        */
+        "geodomain": "smartcity.geofrenzy.place",
         "range": 20//Should look for fences within 20 kilometers away
 })
-//This creates the FencingAgent using that configuration object, but the FA is not running yet.
+/*
+    This creates the FencingAgent using that configuration object, 
+    but the FA is not running yet.
+*/
 var fa = new FencingAgent(profile);
 
-//Before we start the FA, we want to register delegates to respond to its messages. These can also be added after the FA has started.
+/*
+    Before we start the FA, we want to register delegates to respond 
+    to its messages. These can also be added after the FA has 
+    started.
+*/
 var delegate = new FencingAgentDelegate(
         function(response, agentStatus) {
             alert("FA started!");
@@ -121,8 +143,15 @@ __AgentState__
                 ]
             ],
             "ttl": 600,//This is the "time to live"
-            "status": "EXITED",//This is the status of the agent relative to this fence. In this case, the agent is outside of the fence, but has not been outside of it for the full duration of the dwell time.
-            "retrievalTime": "2017-12-19T22:00:56.194Z",//this is a Date object, not just a string
+            /*
+                This is the status of the agent relative to this 
+                fence. In this case, the agent is outside of the
+                 fence, but has not been outside of it for the
+                 full duration of the dwell time. 
+            */
+            "status": "EXITED",
+            //this is a Date object, not just a string
+            "retrievalTime": "2017-12-19T22:00:56.194Z",
             "anchorpoint": [//This is the centerpoint of the fence
                 -115.15015728771687,
                 36.13108008351772
@@ -168,20 +197,62 @@ __AgentState__
             ]
         }
     ],
-    "geodomain": {//This is a Geodomain object (window.plugins.fencingAgent.Geodomain))
-        "status": "EXITED",//This can be any of `DWELLING`, `EXITED`, `ENTERED`, or `AMBIENT`. `DWELLING` is when an agent has been outside of a fence for a certain time, exited is when that time hasn't happened yet, and the other two have the same relationship (`DWELLING` is to `AMBIENT` as `EXITED` is to `ENTERED`) The dwell time cannot be specified in the Cordova SDK yet.
-        "retrievalTime": "2017-12-19T22:00:56.198Z",//This is actually a Date object, not merely a string
-        "requirements": [//Each Geodomain has a set of requirements of different types (described by `baseType` in each requirement object.)
-            {//This is a Color Requirement, and it's fairly self-descriptive.
+    //This is a GeoDomain object 
+    // (window.plugins.fencingAgent.GeoDomain)
+    "geodomain": {
+        /*
+            This can be any of 
+            `DWELLING`,
+            `EXITED`,
+            `ENTERED`,
+            or `AMBIENT`.
+
+            `DWELLING` is when an agent has been outside of a 
+            fence for a certain time, and `EXITED` is when 
+            that time hasn't passed yet. The other two have the
+            same relationship:
+            (`DWELLING` is to `AMBIENT` as `EXITED` is to `ENTERED`)
+            The dwell time cannot be specified in the Cordova SDK
+            yet.
+        */
+        "status": "EXITED",
+        //This is actually a Date object, not just a string.
+        "retrievalTime": "2017-12-19T22:00:56.198Z",
+        /*
+            Each GeoDomain has a set of requirements of different 
+            types (described by `baseType` in each 
+            Requirement object.)
+        */
+        "requirements": [
+            /*
+                This is a Color Requirement, and it's fairly 
+                self-descriptive.
+            */
+            {
                 "baseType": "COLOR",
                 "red": 0,
                 "blue": 255,
                 "green": 97,
                 "alpha": 255
             },
-            {//This is an Interval Requirement, which is basically a number line alternating between "on" and "off". Note that this is not a single span, despite its name. Also, the object (`window.plugins.fencingAgent.IntervalEntitlement`) contains a method, `getStateAtPoint`, which will tell you whether the interval applies, given the point on the interval. Note that values lower than `floor` or higher than `ceiling` will throw an error.
+            /*
+                This is an Interval Requirement, which is basically
+                 a number line alternating between "on" and "off".
+                 Note that this is not a single span, despite its 
+                name. Also, the object 
+                (`window.plugins.fencingAgent.IntervalEntitlement`)
+                 contains a method, `getStateAtPoint`, 
+                which will tell you whether the interval is "on" at
+                a given point.
+            */
+            {
                 "baseType": "INTERVAL",
-                "stateChangePoints": [//These are all of the places where the number line switches between its true and false states.
+                /*
+                    These are all of the places where the number 
+                    line switches between its true and false
+                    states.
+                */
+                "stateChangePoints": [
                     0.5,
                     1.5,
                     2,
@@ -192,16 +263,32 @@ __AgentState__
                     6,
                     6.28
                 ],
-                "initialState": true,//This determines that any point between `0` (the `floor`) to 0.5 (the first of the `stateChangePoints`) is true
-                "floor": 0,//This is the lowest valid value in the interval.
-                "ceiling": 6.28,//This is the highest valid value in the interval.
+                /*
+                    This determines that any point between `0` 
+                    (the `floor`) to 0.5 (the first of the
+                     `stateChangePoints`) is true.
+                */
+                "initialState": true,
+                //This is the lowest valid value in the interval.
+                "floor": 0,
+                //This is the highest valid value in the interval.
+                "ceiling": 6.28,
                 "unit": "DEGREES_TEMPERATURE"
             },
-            {//Profile Requirements are arbitrary strings, which may be application specific, or may exist to map something more cleanly than the other types do.
+            /*
+                Profile Requirements are arbitrary strings, which 
+                may be application specific, or may exist to map
+                something more cleanly than the other types do.
+            */
+            {
                 "baseType": "PROFILE",
                 "value": "e54e258d-c994-4720-a020-0545a00a0b59"
             },
-            {//Here's a Boolean Set Requirement. In the future, there'll be names for each Boolean.
+            /*
+                Here's a Boolean Set Requirement. In the future, 
+                there'll be names for each Boolean.
+            */
+            {
                 "baseType": "BOOLEANSET",
                 "bool0": true,
                 "bool1": true,
@@ -220,7 +307,10 @@ __AgentState__
                 "bool14": false,
                 "bool15": false
             },
-            {//A Threshold Requirement is basically just an interval without 
+            /*
+                A threshold is basically just an interval with only one span.
+            */
+            {
                 "baseType": "THRESHOLD",
                 "lowerBound": 16,
                 "upperBound": 25,
@@ -247,6 +337,6 @@ Agent status update
 }
 ```
 
-### But wait, what's a Geodomain?
-A Geodomain is a holder for requirements and geometries that enriches those geometries with its requriements, and corresponds to a domain name with a `.place` [tld](https://en.wikipedia.org/wiki/Top-level_domain). These are used to query the FDN.
+## What's a GeoDomain?
+A GeoDomain is a new form of Internet property which holds your SmartFence assets, including the geometries and requirements that make up your SmartFences. A GeoDomain address is a specific type of domain name. For more information on this and to acquire your GeoDomain address, please discuss with GeoNetwork. 
 

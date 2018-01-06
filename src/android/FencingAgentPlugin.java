@@ -63,9 +63,9 @@ public class FencingAgentPlugin extends CordovaPlugin {
                         );
             }
             if(delegate == null && actionType != PluginAction.CREATE_AGENT) {
-                throw new IllegalStateException("Cordova Fencing Agent attempted to act on a non-existent agent." + 
-                        " This state should be unreachable; please file a bug report with Geofrenzy."
-                        );//TODO: differentiate error message
+                throw new IllegalStateException("Cordova Fencing Agent discovered a missing delegate for agent `" + 
+                        geodomain + "`This state should be unreachable; please file a bug report with Geofrenzy."
+                        );
             }
 
             JSONObject responseJSON = new JSONObject();
