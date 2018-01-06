@@ -308,7 +308,8 @@ __AgentState__
                 "bool15": false
             },
             /*
-                A threshold is basically just an interval with only one span.
+                A threshold is basically just an interval with only
+                 one span.
             */
             {
                 "baseType": "THRESHOLD",
