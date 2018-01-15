@@ -177,7 +177,7 @@ function FencingAgentProfile(config, lenient) {
     validateObject(config);
     //Validation
     //If not in lenient mode, the config object must not contain any keys outside of those that are used.
-    var keyNames = ["geodomain", "detectApproach", "zoomLevel", "range", "interiorFocus"];
+    var keyNames = ["geodomain", "detectApproach", "zoomLevel", "range", "interiorFocus", "dwellTime"];
     if(lenient !== true) {
         var configKeyNames = Object.getOwnPropertyNames(config);
         for(var i = 0; i < configKeyNames.length; i++) {
@@ -234,12 +234,21 @@ function FencingAgentProfile(config, lenient) {
         config.interiorFocus = true;
     }
 
+    if(typeof config.dwellTime !== "undefined" && config.dwellTime !== null) {
+        if(!(typeof config.dwellTime === "number")) {
+            throw new Error("`dwellTime` in `FencingAgentProfile` must be a numeric value");
+        }
+    } else {
+        config.dwellTime = 1;//one second
+    }
+
     //NOTE: these do not change any agents that already recieved this object.
     this.geodomain = config.geodomain;
     this.range = config.range;
     this.zoomLevel = config.zoomLevel;
     this.detectApproach = config.detectApproach;
     this.interiorFocus = config.interiorFocus;
+    this.dwellTime = config.dwellTime;
 
     //This is encapsulated in order to handle deeper nesting in the future.
     this.copy = function() {
@@ -248,7 +257,8 @@ function FencingAgentProfile(config, lenient) {
             "zoomLevel": this.zoomLevel,
             "range": this.range,
             "detectApproach": this.detectApproach,
-            "interiorFocus": this.interiorFocus
+            "interiorFocus": this.interiorFocus,
+            "dwellTime": this.dwellTime
         });
     }
 }
@@ -372,7 +382,7 @@ function FencingAgent(agentProfile) {
         cordovaErrorHandler,
         "FencingAgent",
         actions.CREATE_AGENT,
-        [profile.geodomain, profile.range, profile.zoomLevel, profile.detectApproach, profile.interiorFocus]
+        [profile.geodomain, profile.range, profile.zoomLevel, profile.detectApproach, profile.interiorFocus, profile.dwellTime]
     );
 
 

@@ -37,12 +37,13 @@ import net.geofrenzy.android.sdk.domain.requirements.Requirement;
 public class FencingAgentPlugin extends CordovaPlugin {
     private static final String LOG_TAG = "FencingAgentPlugin";
 
-    //[profile.geodomain, profile.range, profile.zoomLevel, profile.detectApproach, profile.interiorFocus]
+    //[profile.geodomain, profile.range, profile.zoomLevel, profile.detectApproach, profile.interiorFocus, profile.dwellTime]
     private static final int GEODOMAIN_ARGUMENT_POSITION = 0;
     private static final int RANGE_ARGUMENT_POSITION = 1;
     private static final int ZOOMLEVEL_ARGUMENT_POSITION = 2;
     private static final int DETECT_APPROACH_ARGUMENT_POSITION = 3;
     private static final int INTERIOR_FOCUS_ARGUMENT_POSITION = 4;
+    private static final int DWELL_TIME_ARGUMENT_POSITION = 5;
 
     private HashMap<String, FencingAgent<Void>> agents = new HashMap<String, FencingAgent<Void>>();
     private HashMap<String, CordovaDelegate> delegates = new HashMap<String, CordovaDelegate>();
@@ -82,6 +83,7 @@ public class FencingAgentPlugin extends CordovaPlugin {
                     int range = args.getInt(RANGE_ARGUMENT_POSITION);
                     boolean detectApproach = args.getBoolean(DETECT_APPROACH_ARGUMENT_POSITION);
                     boolean interiorFocus = args.getBoolean(INTERIOR_FOCUS_ARGUMENT_POSITION);
+                    long dwellTime = (long) 1000 * args.getInt(DWELL_TIME_ARGUMENT_POSITION);
 
                     fa = new FencingAgent<Void>(
                             new FencingAgentProfile.Builder()
@@ -90,6 +92,7 @@ public class FencingAgentPlugin extends CordovaPlugin {
                             .setZoomLevel(zoomLevel)
                             .setEmitApproachEvents(detectApproach)
                             .setInsideFocus(interiorFocus)
+                            .setDwellTime(dwellTime)
                             .setContext(this.cordova.getActivity().getApplicationContext())
                             .createAgentProfile(),
                             Void.class
