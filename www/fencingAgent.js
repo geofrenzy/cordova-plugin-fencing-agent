@@ -190,6 +190,68 @@ function FencingAgentProfile(config, lenient) {
         }
     }
 
+    this.validateDetectApproach = function(detectApproach) {
+        if(typeof detectApproach !== "undefined" && detectApproach !== null) {
+            if(!(typeof detectApproach === "boolean")) {
+                throw new Error("`detectApproach` in `FencingAgentProfile` must be a boolean value.");
+            } else {
+                return detectApproach;
+            }
+        } else {
+            return false;
+        }
+    };
+
+    this.validateRange = function(range) {
+        if(typeof range !== "undefined" && range !== null) {
+            if(!(!isNaN(range))) {
+                throw new Error("`range` in `FencingAgentProfile` must be numeric.");
+            } else {
+                return range;
+            }
+        } else {
+            return 2;//2 kilometers
+        }
+    };
+
+    this.validateZoomLevel = function(zoomLevel) {
+        if(typeof zoomLevel !== "undefined" && zoomLevel !== null) {
+            if(!(!isNaN(zoomLevel))) {
+                throw new Error("`zoomLevel` in `FencingAgentProfile` must be numeric.");
+            }
+            if(!(zoomLevel % 1 === 0 && zoomLevel > 0 && zoomLevel < 32)) {
+                throw new Error("`zoomLevel` in `FencingAgentProfile` must be a whole number between 0 and 32.");
+            }
+            return zoomLevel;
+        } else {
+            return 16;//TODO: get this from a configuration file
+        }
+    
+    };
+
+    this.validateInteriorFocus = function(interiorFocus) {
+        if(typeof interiorFocus !== "undefined" && interiorFocus !== null) {
+            if(!(typeof interiorFocus === "boolean")) {
+                throw new Error("`interiorFocus` in `FencingAgentProfile` must be a boolean value.");
+            } else {
+                return interiorFocus;
+            }
+        } else {
+            return true;
+        }
+    };
+    this.validateDwellTime = function(dwellTime) {
+        if(typeof dwellTime !== "undefined" && dwellTime !== null) {
+            if(!(typeof dwellTime === "number")) {
+                throw new Error("`dwellTime` in `FencingAgentProfile` must be a numeric value");
+            } else {
+                return dwellTime;
+            }
+        } else {
+            return 1;//one second
+        }
+    };
+
     //Geodomain is not optional
     if(typeof config.geodomain === "undefined") {
         throw new Error("`FencingAgentProfile` instantiated without a Geodomain. Set `geodomain` on the object given as the first parameter to `FencingAgentProfile`.");
@@ -199,58 +261,37 @@ function FencingAgentProfile(config, lenient) {
         throw new Error("`geodomain` in `FencingAgentProfile` must be a string.");
     }
 
-    if(typeof config.range !== "undefined" && config.zoomLevel !== null) {
-        if(!(!isNaN(config.range))) {
-            throw new Error("`range` in `FencingAgentProfile` must be numeric.");
-        }
-    } else {
-        config.range = 2;//2 kilometers
-    }
+    //this.geodomain = config.geodomain;
+    Object.defineProperty(this, "geodomain", {
+        "value": config.geodomain,
+        "writable": false
+    });
+    //this.range = config.range;
+    Object.defineProperty(this, "range", {
+        "value": this.validateRange(config.range),
+        "writable": false
+    });
+    //this.zoomLevel = config.zoomLevel;
+    Object.defineProperty(this, "zoomLevel", {
+        "value": this.validateZoomLevel(config.zoomLevel),
+        "writable": false
+    });
+    //this.detectApproach = config.detectApproach;
+    Object.defineProperty(this, "detectApproach", {
+        "value": this.validateDetectApproach(config.detectApproach),
+        "writable": false
+    });
+    //this.interiorFocus = config.interiorFocus;
+    Object.defineProperty(this, "interiorFocus", {
+        "value": this.validateInteriorFocus(config.interiorFocus),
+        "writable": false
+    });
+    //this.dwellTime = config.dwellTime;
+    Object.defineProperty(this, "dwellTime", {
+        "value": this.validateDwellTime(config.dwellTime),
+        "writable": false
+    });
 
-    if(typeof config.zoomLevel !== "undefined" && config.zoomLevel !== null) {
-        if(!(!isNaN(config.zoomLevel))) {
-            throw new Error("`zoomLevel` in `FencingAgentProfile` must be numeric.");
-        }
-        if(!(config.zoomLevel % 1 === 0 && config.zoomLevel > 0 && config.zoomLevel < 32)) {
-            throw new Error("`zoomLevel` in `FencingAgentProfile` must be a whole number between 0 and 32.");
-        }
-    } else {
-        config.zoomLevel = 16;//TODO: get this from a configuration file
-    }
-
-    if(typeof config.detectApproach !== "undefined" && config.detectApproach !== null) {
-        if(!(typeof config.detectApproach === "boolean")) {
-            throw new Error("`detectApproach` in `FencingAgentProfile` must be a boolean value.");
-        }
-    } else {
-        config.detectApproach = false;
-    }
-
-    if(typeof config.interiorFocus !== "undefined" && config.interiorFocus !== null) {
-        if(!(typeof config.interiorFocus === "boolean")) {
-            throw new Error("`interiorFocus` in `FencingAgentProfile` must be a boolean value.");
-        }
-    } else {
-        config.interiorFocus = true;
-    }
-
-    if(typeof config.dwellTime !== "undefined" && config.dwellTime !== null) {
-        if(!(typeof config.dwellTime === "number")) {
-            throw new Error("`dwellTime` in `FencingAgentProfile` must be a numeric value");
-        }
-    } else {
-        config.dwellTime = 1;//one second
-    }
-
-    //NOTE: these do not change any agents that already recieved this object.
-    this.geodomain = config.geodomain;
-    this.range = config.range;
-    this.zoomLevel = config.zoomLevel;
-    this.detectApproach = config.detectApproach;
-    this.interiorFocus = config.interiorFocus;
-    this.dwellTime = config.dwellTime;
-
-    //This is encapsulated in order to handle deeper nesting in the future.
     this.copy = function() {
         return new FencingAgentProfile({
             "geodomain": this.geodomain,

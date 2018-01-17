@@ -55,8 +55,8 @@ var profile = new FencingAgentProfile({
             GeoDomain.
         */
         "geodomain": "smartcity.geofrenzy.place",
-        "range": 20//Should look for fences within 20 kilometers away
-})
+        "range": 20,//Should look for fences within 20 kilometers away
+});
 /*
     This creates the FencingAgent using that configuration object, 
     but the FA is not running yet.
@@ -91,7 +91,7 @@ fa.start();//Should (asynchronously) alert "FA started!"
 
 fa.quit();//Should (asynchronously) alert "FA quit."
 ```
-
+(For more information about the Fencing Agent Profile, see FENCING_AGENT_PROFILE.md on Github.)
 Here's what you get for the messages:
 * The starting message gives you a validated _AgentState_ object (which contains validated SmartFences and requirements), and an object containing data about the `FencingAgent` itself.
 * The periodic message gives you a validated _AgentStateUpdate_ object, which contains a before and after _AgentState_, and another status object of the same type.
@@ -144,12 +144,18 @@ __AgentState__
             ],
             "ttl": 600,//This is the "time to live"
             /*
+                
                 This is the status of the agent relative to this 
                 fence. In this case, the agent is outside of the
-                 fence, but has not been outside of it for the
-                 full duration of the dwell time. 
+                fence, but has not been outside of it for the
+                full duration of the dwell time. Once the dwell
+                time elapses, the fence will become `DWELLING`.
+
+                The dwell time also dictates how long it takes
+                after a fence is `EXITED` before it becomes 
+                `AMBIENT`.
             */
-            "status": "EXITED",
+            "status": "ENTERED",
             //this is a Date object, not just a string
             "retrievalTime": "2017-12-19T22:00:56.194Z",
             "anchorpoint": [//This is the centerpoint of the fence
@@ -208,12 +214,24 @@ __AgentState__
             or `AMBIENT`.
 
             `DWELLING` is when an agent has been outside of a 
-            fence for a certain time, and `EXITED` is when 
+            fence for a certain time, and `ENTERED` is when 
             that time hasn't passed yet. The other two have the
             same relationship:
             (`DWELLING` is to `AMBIENT` as `EXITED` is to `ENTERED`)
-            The dwell time cannot be specified in the Cordova SDK
-            yet.
+            
+            The dwell time can be specified with
+            `fencingAgentProfile.dwellTime`. The dwell time
+            dictates both how long it takes to go from `ENTERED` to 
+            `DWELLING`, and how long it takes to go from `EXITED` to
+            `AMBIENT`.
+            
+            If fencingAgentProfile.insideFocus is set to `false`,
+            these values will instead reflect requirement
+            applicability. (For example, `DWELLING` would be 
+            "requirements have been applicable for [dwellTime]"
+            and `ENTERED` would be "requirements appear to be
+            applicable, but this won't be confirmed until the
+            dwell time passes.")
         */
         "status": "EXITED",
         //This is actually a Date object, not just a string.
@@ -322,6 +340,8 @@ __AgentState__
 }
 
 ```
+The dwell concept is shared by Android's [Geofencing Service](https://developer.android.com/training/location/geofencing.html).
+
 
 __AgentStateUpdate__
 ``` javascript
@@ -337,6 +357,7 @@ Agent status update
     "geodomain": "smartcity.geofrenzy.place."
 }
 ```
+
 
 ## What's a GeoDomain?
 A GeoDomain is a new form of Internet property which holds your SmartFence assets, including the geometries and requirements that make up your SmartFences. A GeoDomain address is a specific type of domain name. For more information on this and to acquire your GeoDomain address, please discuss with GeoNetwork. 
