@@ -51,10 +51,10 @@ var FencingAgentProfile = window.plugins.fencingAgent
 */
 var profile = new FencingAgentProfile({
         /*
-            Should look for the "smartcity.geofrenzy.place."
+            Should look for the "smartcity.geofrenzy.geo."
             GeoDomain.
         */
-        "geodomain": "smartcity.geofrenzy.place",
+        "geodomain": "smartcity.geofrenzy.geo",
         "range": 20,//Should look for fences within 20 kilometers away
 });
 /*
@@ -354,7 +354,7 @@ Agent status update
 ``` javascript
 {
     "isRunning": true,
-    "geodomain": "smartcity.geofrenzy.place."
+    "geodomain": "smartcity.geofrenzy.geo."
 }
 ```
 

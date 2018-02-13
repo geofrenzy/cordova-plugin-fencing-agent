@@ -1,6 +1,6 @@
 {
   "name": "cordova-plugin-fencing-agent",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "",
   "main": "www/fencingAgent.js",
   "scripts": {
