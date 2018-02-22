@@ -1,5 +1,5 @@
 dependencies {
-    compile fileTree(dir: "libs", include: ["*.jar", "*.aar"])
+    compile fileTree(dir: "src/main/libs", include: ["*.jar", "*.aar"])
 }
 
 android {
