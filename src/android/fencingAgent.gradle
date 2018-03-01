@@ -1,12 +1,6 @@
-def libsDir = ""
-if (System.properties['os.name'].toLowerCase().contains('windows')) {
-    libsDir = "src/main/libs"
-} else {
-    libsDir = "libs"
-}
-
 dependencies {
-    compile fileTree(dir: libsDir, include: ["*.jar", "*.aar"])
+    compile fileTree(dir: "libs", include: ["*.jar", "*.aar"])
+    compile fileTree(dir: "src/main/libs", include: ["*.jar", "*.aar"])
 }
 
 android {
