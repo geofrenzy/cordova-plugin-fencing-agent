@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
            id="net.geofrenzy.cordova.fencingagent"
-      version="0.1.6">
+      version="0.1.8">
     <name>Fencing Agent</name>
     <description>Cordova Fencing Agent plugin</description>
     <license>Proprietary</license>
